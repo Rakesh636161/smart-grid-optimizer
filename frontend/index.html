@@ -1,0 +1,567 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Smart Grid Optimizer | Caveman AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0f1e;
+            color: #eef2ff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #0f1322;
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            border: 1px solid #1e293b;
+        }
+
+        .page {
+            padding: 32px 40px;
+            transition: all 0.3s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #splashPage {
+            text-align: center;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0a0f1e 0%, #111827 100%);
+        }
+
+        .logo {
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        .logo-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        .card {
+            background: #1a1f2e;
+            border-radius: 28px;
+            padding: 32px;
+            border: 1px solid #2d3748;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        input, button {
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            border-radius: 48px;
+            padding: 12px 20px;
+            border: none;
+            outline: none;
+        }
+
+        input {
+            background: #0f1322;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            width: 100%;
+        }
+
+        input:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+        }
+
+        button {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #334155;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .weather-badge {
+            background: #0f172a;
+            border-radius: 20px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .grid-canvas {
+            background: #0a0f1a;
+            border-radius: 24px;
+            margin-top: 20px;
+            border: 2px solid #2d3748;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            background: #070b14;
+            border-radius: 20px;
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #131829;
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: 1px solid #2d3748;
+        }
+
+        .line-detail {
+            font-size: 12px;
+            font-family: monospace;
+            background: #0f1322;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin: 16px 0 8px;
+            color: #cbd5e1;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .battery-status {
+            background: #1e293b;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-weight: 700;
+        }
+
+        .legend {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+
+        .color-box {
+            width: 20px;
+            height: 12px;
+            display: inline-block;
+            border-radius: 4px;
+            margin-right: 6px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="app">
+    <!-- Page 1: Splash with Logo -->
+    <div id="splashPage" class="page">
+        <div class="logo-icon">⚡🌞💨</div>
+        <div class="logo">SMART GRID OPTIMIZER</div>
+        <div style="font-size: 1rem; color: #94a3b8; margin-top: 8px;">Intelligent Energy Management System</div>
+        <div style="margin-top: 40px; font-size: 14px;">Loading intelligent systems...</div>
+    </div>
+
+    <!-- Page 2: City Input -->
+    <div id="cityPage" class="page hidden">
+        <div class="card">
+            <h2>📍 Enter Your City</h2>
+            <div class="flex-row" style="margin-top: 20px;">
+                <input type="text" id="cityInput" placeholder="e.g., London, New York, Tokyo" style="flex: 1;">
+                <button id="fetchWeatherBtn">Get Weather</button>
+            </div>
+            <div id="weatherDisplay" class="weather-badge hidden">
+                <div id="weatherInfo"></div>
+                <div id="tempDisplay" style="font-size: 1.4rem; font-weight: bold;"></div>
+            </div>
+            <button id="continueToCapacityBtn" class="hidden" style="margin-top: 20px;">Continue →</button>
+        </div>
+    </div>
+
+    <!-- Page 3: Battery & Wire Capacity -->
+    <div id="capacityPage" class="page hidden">
+        <div class="card">
+            <h2>🔋 System Configuration</h2>
+            <div style="margin: 20px 0;">
+                <label>Battery Capacity (Watt-hours):</label>
+                <input type="number" id="batteryCapacity" placeholder="e.g., 10000" value="10000" step="500">
+            </div>
+            <div style="margin: 20px 0;">
+                <label>Wire Capacity (Watts per line):</label>
+                <input type="number" id="wireCapacity" placeholder="e.g., 2500" value="2500" step="100">
+            </div>
+            <div id="genPreview" class="weather-badge">
+                <strong>⚡ Solar & Wind Generation (Current)</strong><br>
+                <span id="solarWatts">0 W</span> | <span id="windWatts">0 W</span> | <span id="totalGen">0 W</span>
+            </div>
+            <button id="calculateGridBtn">Calculate & Show Grid →</button>
+        </div>
+    </div>
+
+    <!-- Page 4: Grid Map Simulation -->
+    <div id="gridPage" class="page hidden">
+        <div class="flex-row" style="justify-content: space-between; margin-bottom: 16px;">
+            <h2>⚡ Smart Grid Topology</h2>
+            <div class="battery-status" id="batteryStatus">🔋 SOC: 0%</div>
+        </div>
+        
+        <canvas id="gridCanvas" width="1000" height="550" style="width:100%; height:auto; background:#070b14; border-radius:20px;"></canvas>
+        
+        <div class="stats-panel">
+            <div class="stat-card">🌞 Solar: <span id="liveSolar">0</span> W</div>
+            <div class="stat-card">💨 Wind: <span id="liveWind">0</span> W</div>
+            <div class="stat-card">⚡ Wire Cap: <span id="liveWireCap">0</span> W</div>
+            <div class="stat-card">🔋 Battery Flow: <span id="batteryFlow">0</span> W</div>
+        </div>
+
+        <div id="lineDetails" style="background:#131829; border-radius: 20px; padding: 12px; margin: 10px 0; font-size: 12px; max-height: 100px; overflow-y: auto;"></div>
+
+        <div class="legend">
+            <div><span class="color-box" style="background:#10b981;"></span> Normal Flow</div>
+            <div><span class="color-box" style="background:#ef4444;"></span> Overflow (Red > Cap)</div>
+            <div><span class="color-box" style="background:#eab308;"></span> Underflow (Yellow < Cap)</div>
+            <div><span class="color-box" style="background:#f59e0b;"></span> Moving Dots</div>
+        </div>
+
+        <div class="flex-row" style="margin-top: 20px; gap: 12px;">
+            <button id="simulateCloudyBtn" class="btn-secondary">☁️ Simulate Sunny → Cloudy (8h)</button>
+            <button id="resetGridBtn" class="btn-secondary">⟳ Reset Simulation</button>
+        </div>
+        <div id="transitionMessage" style="margin-top: 12px; font-size: 13px; color: #94a3b8;"></div>
+    </div>
+</div>
+
+<script>
+    // ----------------------- GLOBAL STATE -----------------------
+    let weatherData = null;
+    let solarGen = 0, windGen = 0;
+    let batteryCapacityWh = 10000;
+    let wireCapacityW = 2500;
+    let batterySOC_Wh = 5000;        // start 50%
+    let totalLoad = 210;              // Consumer takes exactly 210W (modified)
+    let simulationInterval = null;
+    let animationFrame = null;
+    let currentWeatherCondition = 'sunny';
+    
+    // Grid nodes & edges (market removed)
+    const nodes = {
+        solar: { x: 120, y: 180, label: 'Solar Farm', type: 'gen' },
+        wind: { x: 120, y: 320, label: 'Wind Turbine', type: 'gen' },
+        battery: { x: 380, y: 250, label: 'Battery Bank', type: 'storage' },
+        distribution: { x: 620, y: 250, label: 'Distribution Hub', type: 'dist' },
+        consumer: { x: 820, y: 250, label: 'Consumer Zone', type: 'load' }
+    };
+    
+    // Edges: from -> to
+    const edges = [
+        { id: 'solar_bat', from: 'solar', to: 'battery', power: 0, capacity: wireCapacityW, color: '#4ade80' },
+        { id: 'wind_bat', from: 'wind', to: 'battery', power: 0, capacity: wireCapacityW, color: '#4ade80' },
+        { id: 'bat_dist', from: 'battery', to: 'distribution', power: 0, capacity: wireCapacityW, color: '#4ade80' },
+        { id: 'dist_cons', from: 'distribution', to: 'consumer', power: 0, capacity: wireCapacityW, color: '#4ade80' }
+    ];
+    
+    const canvas = document.getElementById('gridCanvas');
+    let ctx = canvas.getContext('2d');
+    
+    function resizeCanvas() {
+        const container = canvas.parentElement;
+        const width = Math.min(1000, container.clientWidth - 20);
+        canvas.width = 1000;
+        canvas.height = 550;
+        canvas.style.width = `${width}px`;
+        canvas.style.height = 'auto';
+        drawGrid();
+    }
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Core power flow logic: consumer first (210W), then battery
+    function updatePowerFlows() {
+        let effectiveSolar = solarGen;
+        let effectiveWind = windGen;
+        if (currentWeatherCondition === 'cloudy') {
+            effectiveSolar = solarGen * 0.15;
+            effectiveWind = windGen * 0.7;
+        }
+        
+        const totalGeneration = effectiveSolar + effectiveWind;
+        const consumerDemand = totalLoad;   // 210W fixed
+        let powerToConsumer = 0;
+        let chargePower = 0;
+        let dischargePower = 0;
+        
+        if (totalGeneration >= consumerDemand) {
+            // Excess goes to battery
+            powerToConsumer = consumerDemand;
+            let excess = totalGeneration - consumerDemand;
+            chargePower = Math.min(excess, (batteryCapacityWh - batterySOC_Wh) / 0.9);
+            if (chargePower < 0) chargePower = 0;
+            batterySOC_Wh += chargePower * 0.9;
+            dischargePower = 0;
+            document.getElementById('batteryFlow').innerHTML = `🔋 Charging +${Math.round(chargePower)} W from excess`;
+        } else {
+            // Deficit: battery supplies what generation lacks
+            let deficit = consumerDemand - totalGeneration;
+            dischargePower = Math.min(deficit, batterySOC_Wh * 0.9);
+            batterySOC_Wh -= dischargePower;
+            powerToConsumer = totalGeneration + dischargePower;
+            chargePower = 0;
+            document.getElementById('batteryFlow').innerHTML = `🔋 Discharging -${Math.round(dischargePower)} W to cover deficit`;
+        }
+        
+        batterySOC_Wh = Math.min(batteryCapacityWh, Math.max(0, batterySOC_Wh));
+        const batterySOCPercent = (batterySOC_Wh / batteryCapacityWh) * 100;
+        document.getElementById('batteryStatus').innerHTML = `🔋 SOC: ${Math.round(batterySOCPercent)}% (${Math.round(batterySOC_Wh)} Wh)`;
+        
+        // Assign power to edges
+        edges[0].power = effectiveSolar;               // solar → battery
+        edges[1].power = effectiveWind;                // wind → battery
+        edges[2].power = totalGeneration + (dischargePower - chargePower); // battery → distribution
+        edges[3].power = powerToConsumer;              // distribution → consumer
+        
+        // Update line colors based on wire capacity
+        for (let edge of edges) {
+            edge.capacity = wireCapacityW;
+            if (edge.power > edge.capacity) {
+                edge.color = '#ef4444'; // red overflow
+            } else if (edge.power < edge.capacity && edge.power > 0) {
+                edge.color = '#eab308'; // yellow underflow
+            } else {
+                edge.color = '#4ade80'; // green normal
+            }
+        }
+        
+        document.getElementById('liveSolar').innerText = Math.round(effectiveSolar);
+        document.getElementById('liveWind').innerText = Math.round(effectiveWind);
+        document.getElementById('liveWireCap').innerText = wireCapacityW;
+        
+        const lineDetailsDiv = document.getElementById('lineDetails');
+        lineDetailsDiv.innerHTML = edges.map(e => 
+            `<span class="line-detail">${e.id}: ${Math.round(e.power)}W / ${e.capacity}W - ${e.power > e.capacity ? 'OVERFLOW' : (e.power < e.capacity ? 'UNDERFLOW' : 'NORMAL')}</span>`
+        ).join(' | ');
+        
+        drawGrid();
+    }
+    
+    function drawGrid() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 14px "Inter", monospace';
+        ctx.shadowBlur = 0;
+        
+        // Draw edges with moving dots
+        for (let edge of edges) {
+            const fromNode = nodes[edge.from];
+            const toNode = nodes[edge.to];
+            if (!fromNode || !toNode) continue;
+            
+            ctx.beginPath();
+            ctx.moveTo(fromNode.x, fromNode.y);
+            ctx.lineTo(toNode.x, toNode.y);
+            ctx.strokeStyle = edge.color;
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            
+            // Moving dots
+            const progress = (Date.now() * 0.002 + (edge.id.charCodeAt(0) * 100)) % 100 / 100;
+            const midX = fromNode.x + (toNode.x - fromNode.x) * progress;
+            const midY = fromNode.y + (toNode.y - fromNode.y) * progress;
+            ctx.beginPath();
+            ctx.arc(midX, midY, 6, 0, Math.PI * 2);
+            ctx.fillStyle = '#fbbf24';
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        // Draw nodes
+        for (let [key, node] of Object.entries(nodes)) {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 28, 0, 2 * Math.PI);
+            ctx.fillStyle = '#1e293b';
+            ctx.fill();
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px "Inter"';
+            ctx.fillText(node.label, node.x - 30, node.y - 15);
+            let icon = '';
+            if (key === 'solar') icon = '☀️';
+            else if (key === 'wind') icon = '💨';
+            else if (key === 'battery') icon = '🔋';
+            else if (key === 'consumer') icon = '🏠';
+            else icon = '⚡';
+            ctx.fillText(icon, node.x - 8, node.y + 5);
+        }
+        
+        // Display power values near lines
+        for (let edge of edges) {
+            const from = nodes[edge.from], to = nodes[edge.to];
+            const midX = (from.x + to.x) / 2;
+            const midY = (from.y + to.y) / 2 - 10;
+            ctx.fillStyle = '#cbd5e1';
+            ctx.font = '10px monospace';
+            ctx.fillText(`${Math.round(edge.power)}W`, midX, midY);
+        }
+    }
+    
+    function startAnimation() {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        function animate() {
+            drawGrid();
+            animationFrame = requestAnimationFrame(animate);
+        }
+        animate();
+    }
+    
+    function simulateCloudyTransition() {
+        if (currentWeatherCondition === 'cloudy') {
+            document.getElementById('transitionMessage').innerText = 'Already in cloudy mode.';
+            return;
+        }
+        // Fully charge battery before transition
+        batterySOC_Wh = batteryCapacityWh;
+        document.getElementById('transitionMessage').innerHTML = '☁️ Weather change: Sunny → Cloudy. Battery fully charged. Now discharging to cover deficit.';
+        currentWeatherCondition = 'cloudy';
+        updatePowerFlows();
+    }
+    
+    function resetToSunny() {
+        currentWeatherCondition = 'sunny';
+        batterySOC_Wh = Math.min(batteryCapacityWh, batterySOC_Wh);
+        updatePowerFlows();
+        document.getElementById('transitionMessage').innerHTML = 'Reset to sunny weather conditions.';
+    }
+    
+    // Splash navigation
+    setTimeout(() => {
+        document.getElementById('splashPage').classList.add('hidden');
+        document.getElementById('cityPage').classList.remove('hidden');
+    }, 5000);
+    
+    // Weather fetch
+    document.getElementById('fetchWeatherBtn').onclick = async () => {
+        const city = document.getElementById('cityInput').value.trim();
+        if (!city) return alert('Enter city');
+        const res = await fetch(`/api/weather?city=${encodeURIComponent(city)}`);
+        const data = await res.json();
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        weatherData = data;
+        solarGen = data.solarPower;
+        windGen = data.windPower;
+        document.getElementById('weatherDisplay').classList.remove('hidden');
+        document.getElementById('weatherInfo').innerHTML = `🌍 ${data.city} | ${data.description} | ☁️ ${data.clouds}% clouds | 💨 ${data.windSpeed} m/s`;
+        document.getElementById('tempDisplay').innerHTML = `🌡️ ${data.temperature}°C`;
+        document.getElementById('continueToCapacityBtn').classList.remove('hidden');
+        
+        if (data.hasSunnyToCloudy) {
+            document.getElementById('transitionMessage').innerHTML = `⏰ Forecast: Sunny to cloudy in ~${data.transitionHour} hours. Auto battery pre-charge available.`;
+        }
+    };
+    
+    document.getElementById('continueToCapacityBtn').onclick = () => {
+        if (!weatherData) return;
+        document.getElementById('cityPage').classList.add('hidden');
+        document.getElementById('capacityPage').classList.remove('hidden');
+        document.getElementById('solarWatts').innerText = `${solarGen} W`;
+        document.getElementById('windWatts').innerText = `${windGen} W`;
+        document.getElementById('totalGen').innerText = `${solarGen + windGen} W`;
+    };
+    
+    document.getElementById('calculateGridBtn').onclick = () => {
+        batteryCapacityWh = parseFloat(document.getElementById('batteryCapacity').value);
+        wireCapacityW = parseFloat(document.getElementById('wireCapacity').value);
+        if (isNaN(batteryCapacityWh)) batteryCapacityWh = 10000;
+        if (isNaN(wireCapacityW)) wireCapacityW = 2500;
+        batterySOC_Wh = Math.min(batteryCapacityWh * 0.5, batteryCapacityWh);
+        
+        // Set capacities on edges
+        for (let edge of edges) edge.capacity = wireCapacityW;
+        
+        document.getElementById('capacityPage').classList.add('hidden');
+        document.getElementById('gridPage').classList.remove('hidden');
+        resizeCanvas();
+        startAnimation();
+        updatePowerFlows();
+        
+        if (weatherData && weatherData.hasSunnyToCloudy && currentWeatherCondition === 'sunny') {
+            document.getElementById('transitionMessage').innerHTML = `⚠️ Forecast shows sunny to cloudy within ${weatherData.transitionHour}h. Use the button to simulate.`;
+        } else {
+            document.getElementById('transitionMessage').innerHTML = 'Grid active. Simulate weather change using the cloudy button.';
+        }
+    };
+    
+    document.getElementById('simulateCloudyBtn').onclick = simulateCloudyTransition;
+    document.getElementById('resetGridBtn').onclick = resetToSunny;
+    
+    setTimeout(() => {
+        if (ctx) drawGrid();
+    }, 200);
+</script>
+</body>
+</html>
